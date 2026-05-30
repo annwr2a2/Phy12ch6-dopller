@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكاة تأثير دوبلر للامتحانات - الأستاذ أنور البلوشي</title>
+    <style>
+        /* إعدادات الخطوط والتباين العالي جداً للرؤية والنسخ للامتحانات */
+        * {
+            font-family: 'Arial', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 900 !important; /* خط عريض جداً لجميع العناصر بدون استثناء لضمان الوضوح الصفي */
+            box-sizing: border-box;
+            color: #111111; /* لون داكن جداً لأعلى تباين صفي */
+        }
+
+        body {
+            background-color: #f8fafc; 
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 950px; /* عمود واحد متسلسل رأسي بالكامل يتلاءم مع الحواسب والهواتف */
+            margin: 0 auto;
+            padding: 5px;
+        }
+
+        /* الهيكل المشترك للأطر المتسلسلة عمودياً */
+        .frame-box {
+            background-color: #ffffff;
+            border: 4px solid #111111;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 25px; 
+            width: 100%;
+        }
+
+        /* الإطار الأول: التحكم الرئيسي */
+        .frame-control {
+            background-color: #eef2f7;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 15px 0;
+            color: #002b5b;
+            line-height: 1.4;
+        }
+
+        .audio-btn {
+            background-color: #008cba;
+            color: #ffffff;
+            border: 3px solid #111111;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 100%;
+        }
+        .audio-btn * { color: #fff !important; }
+
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            background: #ffffff;
+            padding: 15px;
+            border: 3px solid #111111;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .selector-item {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+            gap: 5px;
+        }
+
+        select, button {
+            padding: 12px;
+            font-size: 1.05rem;
+            border: 3px solid #111111;
+            border-radius: 6px;
+            background-color: #ffffff;
+            cursor: pointer;
+            max-width: 100%;
+        }
+
+        .btn-toggle { background-color: #ffcc00; }
+
+        /* الإطار الثاني: الرسم البياني */
+        .frame-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .frame-title {
+            font-size: 1.35rem;
+            color: #002b5b;
+            margin: 0 0 15px 0;
+            width: 100%;
+            border-bottom: 3px solid #111111;
+            padding-bottom: 8px;
+        }
+
+        canvas {
+            background-color: #ffffff; /* خلفية بيضاء ناصعة تماماً تطابق ورقة الامتحان */
+            border: 3px solid #111111;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 630px; 
+            height: auto; 
+        }
+
+        /* الإطار الثالث: الحسابات والقيم الرياضية */
+        .frame-math {
+            background-color: #ffffff;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: #fff9e6;
+            border: 3px solid #111111;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-title { font-size: 1rem; color: #444; margin-bottom: 5px; }
+        
+        .card-value { 
+            font-size: 1.4rem; 
+            color: #b60000; 
+            direction: ltr !important; 
+            display: inline-block;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #111111;
+            border-radius: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px; 
+        }
+
+        th, td {
+            border: 2px solid #111111;
+            padding: 10px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        th { background-color: #eef2f7; }
+        
+        .word-equation {
+            direction: ltr !important;
+            text-align: center;
+            font-family: 'Cambria Math', 'Times New Roman', Arial, sans-serif;
+            font-style: italic;
+        }
+
+        /* الإطار الرابع والأخير: المسائل والتقييم الصفي */
+        .frame-quiz {
+            background-color: #fff5f5;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            background-color: #ffffff;
+            padding: 15px;
+            border: 3px solid #111111;
+            border-radius: 8px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            padding: 15px;
+            font-size: 1.15rem;
+            text-align: center; 
+            border: 3px solid #111111;
+            border-radius: 8px;
+            direction: ltr !important;
+        }
+
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.9; }
+        .correct-choice { background-color: #2ecc71 !important; color: white !important; }
+        .correct-choice * { color: white !important; }
+        .wrong-choice { background-color: #e74c3c !important; color: white !important; }
+        .wrong-choice * { color: white !important; }
+
+        .solution-box {
+            margin-top: 15px;
+            background-color: #ffffff;
+            border: 4px dashed #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+        }
+
+        .math-step-block {
+            direction: ltr !important;
+            text-align: left;
+            background-color: #f1f4f9;
+            padding: 12px;
+            border-left: 5px solid #e74c3c;
+            border-radius: 4px;
+            margin: 8px 0 15px 0;
+            font-family: 'Cambria Math', 'Times New Roman', sans-serif;
+            overflow-x: auto; 
+        }
+
+        .action-btn {
+            background-color: #27ae60;
+            color: white !important;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 1.25rem;
+            padding: 14px;
+            border: 3px solid #111111;
+            border-radius: 8px;
+        }
+        .action-btn * { color: white !important; }
+
+        /* الشاشات الصغيرة وتوافق اللمس المحمول */
+        @media (max-width: 680px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.4rem; }
+            .selector-grid { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+            .cards-container { grid-template-columns: 1fr; gap: 10px; }
+            .options-grid { grid-template-columns: 1fr; gap: 10px; }
+            .option-btn { padding: 12px; font-size: 1.05rem; }
+            .frame-box { padding: 15px; margin-bottom: 20px; }
+            .frame-title { font-size: 1.15rem; }
+        }
+
+        footer {
+            background-color: #111111;
+            color: #ffffff;
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            width: 100%;
+        }
+        footer * { color: #ffffff !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="frame-box frame-control">
+        <h1>لوحة تحكم محاكاة تأثير دوبلر الموجي الموحد</h1>
+        <button class="audio-btn" onclick="playLessonExplanation()">
+            🔊 اضغط للاستماع إلى الشرح الصوتي التعليمي للامتحانات
+        </button>
+        
+        <div class="selector-grid">
+            <div class="selector-item">
+                <label>سرعة الموجة الصوتية (v) بمتر/ثانية:</label>
+                <select id="inputV" onchange="updateSimulation()">
+                    <option value="330">v = 330 m/s</option>
+                    <option value="340" selected>v = 340 m/s (القياسية)</option>
+                    <option value="350">v = 350 m/s</option>
+                </select>
+            </div>
+            <div class="selector-item">
+                <label>تردد المصدر الصوتي (fs) بالهرتز:</label>
+                <select id="inputFs" onchange="updateSimulation()">
+                    <option value="100" selected>fs = 100 Hz</option>
+                    <option value="150">fs = 150 Hz</option>
+                    <option value="200">fs = 200 Hz</option>
+                </select>
+            </div>
+            <div class="selector-item">
+                <label>سرعة حركة المصدر (vs) بمتر/ثانية:</label>
+                <select id="inputVs" onchange="updateSimulation()">
+                    <option value="0">vs = 0 m/s (السكون)</option>
+                    <option value="40">vs = 40 m/s</option>
+                    <option value="80" selected>vs = 80 m/s</option>
+                    <option value="120">vs = 120 m/s</option>
+                    <option value="340">vs = 340 m/s (حاجز الصوت)</option>
+                </select>
+            </div>
+            <div class="selector-item">
+                <label>التحكم بالحركة الفيزيائية:</label>
+                <button id="btnToggle" class="btn-toggle" onclick="toggleAnimation()">إيقاف الحركة</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="frame-box frame-visual">
+        <div class="frame-title">🖼️ الإطار الثاني: الرسم البياني المعتمد لتأثير دوبلر (جاهز للاقتصاص والطباعة)</div>
+        <canvas id="examCanvas" width="630" height="400"></canvas>
+    </div>
+
+    <div class="frame-box frame-math">
+        <div class="frame-title">📊 الإطار الثالث: لوحة المعطيات والحسابات الرياضية الفورية المباشرة</div>
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-title">تردد الاقتراب المسموع للمراقب B</div>
+                <div class="card-value" id="cardFApp">130.8 Hz</div>
+            </div>
+            <div class="card">
+                <div class="card-title">طول موجة الاقتراب للمراقب B</div>
+                <div class="card-value" id="cardLApp">2.60 m</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الحالة المنهجية</th>
+                        <th>القانون المستخدم (Word Style)</th>
+                        <th>التردد المسموع fo (LTR)</th>
+                        <th>الطول الموجي λ' (LTR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>حالة السكون الثابت</b></td>
+                        <td class="word-equation">fo = fs | λ = v / fs</td>
+                        <td class="word-equation" id="tableFStat">-</td>
+                        <td class="word-equation" id="tableLStat">-</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #27ae60;"><b>حالة الاقتراب (المراقب B)</b></td>
+                        <td class="word-equation">fo = fs × [v / (v - vs)]</td>
+                        <td class="word-equation" id="tableFApp">-</td>
+                        <td class="word-equation" id="tableLApp">-</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #e74c3c;"><b>حالة الابتعاد (المراقب A)</b></td>
+                        <td class="word-equation">fo = fs × [v / (v + vs)]</td>
+                        <td class="word-equation" id="tableFRec">-</td>
+                        <td class="word-equation" id="tableLRec">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="frame-box frame-quiz">
+        <div class="frame-title" style="color:#c0392b; border-bottom-color:#c0392b;">🎯 الإطار الرابع: قسم مسائل تأثير دوبلر المنهجية (حماية كاملة من التخمين)</div>
+        <div id="questionContainer" class="question-text">
+            جاري إعداد المسألة المنهجية الشاملة...
+        </div>
+        
+        <div class="options-grid" id="optionsContainer">
+            </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h3 style="color:#e74c3c; margin-top:0;">📝 خطوات الحل والتعويض النموذجي بالتفصيل الممل (Word Style):</h3>
+            <div id="solutionContent"></div>
+        </div>
+
+        <button class="action-btn" onclick="generateNewQuestion()">🔄 توليد مسألة عشوائية جديدة وتصفير الإجابات</button>
+        <button class="action-btn" style="background-color: #8e44ad; margin-top: 10px;" onclick="printDopplerExamPDF()">🖨️ إصدار ورقة امتحان كاملة + مفتاح الإجابة (PDF)</button>
+    </div>
+
+    <footer>
+        تطوير وبرمجة النظام الامتحاني العمودي الموحد لتأثير دوبلر: الأستاذ أنور البلوشي<br>
+        سلطنة عمان - وزارة التربية والتعليم<br>
+        للتواصل والاستفسار هاتفياً أو عبر الواتساب الفوري: 92818606 (00968)
+    </footer>
+
+</div>
+
+<script>
+    const canvas = document.getElementById('examCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // إعدادات الرسوم والأنيميشن والمواقع الثابتة لحماية لقطات شاشة الامتحانات
+    let isRunning = true;
+    let waves = [];
+    let sourceX = 315; 
+    const sourceY = 200;
+    let lastWaveTime = 0;
+    let currentElectronLevel = "stationary"; 
+
+    window.onload = function() {
+        updateSimulation();
+        generateNewQuestion();
+        requestAnimationFrame(animate);
+    };
+
+    function toggleAnimation() {
+        isRunning = !isRunning;
+        document.getElementById('btnToggle').innerText = isRunning ? "إيقاف الحركة" : "تشغيل الحركة";
+        if (isRunning) requestAnimationFrame(animate);
+    }
+
+    function updateSimulation() {
+        const v = parseFloat(document.getElementById('inputV').value);
+        const fs = parseFloat(document.getElementById('inputFs').value);
+        const vs = parseFloat(document.getElementById('inputVs').value);
+
+        // الحسابات الفيزيائية الصحيحة
+        const fStat = fs;
+        const lStat = v / fs;
+
+        let fApp = vs >= v ? Infinity : fs * (v / (v - vs));
+        let lApp = (v - vs) / fs;
+
+        let fRec = fs * (v / (v + vs));
+        let lRec = (v + vs) / fs;
+
+        // طباعة النتائج في البطاقات والجدول
+        document.getElementById('cardFApp').innerHTML = isFinite(fApp) ? fApp.toFixed(1) + " Hz" : "∞ (Shockwave)";
+        document.getElementById('cardLApp').innerHTML = lApp.toFixed(2) + " m";
+
+        document.getElementById('tableFStat').innerHTML = fStat.toFixed(1) + " Hz";
+        document.getElementById('tableLStat').innerHTML = lStat.toFixed(2) + " m";
+
+        document.getElementById('tableFApp').innerHTML = isFinite(fApp) ? fApp.toFixed(1) + " Hz" : "∞ (حاجز الصوت)";
+        document.getElementById('tableLApp').innerHTML = lApp.toFixed(2) + " m";
+
+        document.getElementById('tableFRec').innerHTML = fRec.toFixed(1) + " Hz";
+        document.getElementById('tableLRec').innerHTML = lRec.toFixed(2) + " m";
+        
+        if(vs === 0) sourceX = canvas.width / 2;
+    }
+
+    function animate(time) {
+        if (!isRunning) {
+            requestAnimationFrame(animate);
+            return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // رسم خلفية بيضاء ناصعة
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const v = parseFloat(document.getElementById('inputV').value);
+        const vs = parseFloat(document.getElementById('inputVs').value);
+        const fs = parseFloat(document.getElementById('inputFs').value);
+
+        const visualSoundSpeed = v * 0.008;
+        const visualSourceSpeed = vs * 0.008;
+
+        // تحريك المصدر لليسار لمحاكاة الاقتراب نحو المراقب B والابتعاد عن A
+        if (vs > 0) {
+            sourceX -= visualSourceSpeed;
+            if (sourceX < 120) {
+                sourceX = canvas.width - 120; 
+                waves = [];
+            }
+        }
+
+        // توليد النبضات الموجية بناءً على التردد المحدد
+        const waveInterval = 1000 / (fs * 0.08);
+        if (time - lastWaveTime > waveInterval) {
+            waves.push({ x: sourceX, y: sourceY, r: 0 });
+            lastWaveTime = time;
+        }
+
+        // رسم النبضات الموجية بلون أزرق صافي عالي التباين تلبية لطلب الأستاذ أنور
+        waves.forEach((wave) => {
+            wave.r += visualSoundSpeed;
+
+            ctx.beginPath();
+            ctx.arc(wave.x, wave.y, wave.r, 0, 2 * Math.PI);
+            ctx.strokeStyle = "#0000ff"; 
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        });
+
+        waves = waves.filter(w => w.r < canvas.width);
+
+        // رسم المراقب B (يسار - اقتراب)
+        ctx.fillStyle = "#111111";
+        ctx.beginPath(); ctx.arc(60, sourceY, 10, 0, 2 * Math.PI); ctx.fill();
+        ctx.font = "900 14px Arial";
+        ctx.fillText("المراقب B (اقتراب)", 15, sourceY - 20);
+        ctx.font = "900 12px Arial";
+        ctx.fillStyle = "#0000ff";
+        if(vs > 0) ctx.fillText("(فوتون ممتص/مضغوط)", 15, sourceY + 25);
+
+        // رسم المراقب A (يمين - ابتعاد)
+        ctx.fillStyle = "#111111";
+        ctx.beginPath(); ctx.arc(canvas.width - 60, sourceY, 10, 0, 2 * Math.PI); ctx.fill();
+        ctx.font = "900 14px Arial";
+        ctx.fillText("المراقب A (ابتعاد)", canvas.width - 130, sourceY - 20);
+        ctx.font = "900 12px Arial";
+        ctx.fillStyle = "#0000ff";
+        if(vs > 0) ctx.fillText("(فوتون منبعث/متخلخل)", canvas.width - 145, sourceY + 25);
+
+        // رسم مركز النواة والمصدر المضيء بالأسود الامتحاني النقي الجاهز للطباعة الجافة
+        ctx.fillStyle = "#000000";
+        ctx.beginPath(); ctx.arc(sourceX, sourceY, 7, 0, 2 * Math.PI); ctx.fill();
+
+        requestAnimationFrame(animate);
+    }
+
+    // الشرح الصوتي الفيزيائي الموجه للامتحانات بوقفات تنفسية طبيعية
+    function playLessonExplanation() {
+        window.speechSynthesis.cancel();
+        let lessonText = "مرحباً بكم يا أبنائي الطلاب ... معكم الأستاذ أنور البلوشي ... لنفهم معاً ظاهرة تأثير دوبلر الموجية من خلال المخطط الامتحاني النقي المعروض أمامنا ... " +
+        "عندما يتحرك المصدر الصوتي أو الضوئي نحو اليسار باتجاه المراقب باء ... فإن جبهات الموجات الزرقاء تنضغط وتقترب من بعضها البعض ... مما يؤدي إلى زيادة التردد المسموع ونقصان الطول الموجي ... ونعبر عن هذا تربوياً بحالة الامتصاص أو التردد المرتفع ... " +
+        "وعلى الجانب الآخر ... يبتعد المصدر عن المراقب ألف جهة اليمين ... فتتباعد جبهات الموجات وتتخلخل ... مما يتسبب في نقصان التردد وزيادة الطول الموجي ... ونعبر عنه بحالة الانبعاث أو الانزياح نحو الترددات الأقل ... " +
+        "أما إذا تساوت سرعة المصدر مع سرعة الموجة نفسها ... فتتراكم الأمواج في نقطة واحدة معلنةً اختراق حاجز الصوت أو الصدمة الموجية الكهرومغناطيسية ... والآن أدعوكم للتركيز وحل المسائل المنهجية الدقيقة بالأسفل لضمان الدرجة الكاملة ... بالتوفيق لكم جميعاً.";
+
+        let utterance = new SpeechSynthesisUtterance(lessonText);
+        utterance.lang = 'ar-OM';
+        utterance.rate = 0.82;
+        utterance.pitch = 0.95;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // دالة حزم وتوليد سؤال علمي حقيقي واحد دون أي معطيات عشوائية افتراضية لتأثير دوبلر
+    function generateSingleDopplerQuestion() {
+        const velocities = [330, 340, 350];
+        const frequencies = [100, 120, 150, 200];
+        const sourceVels = [30, 50, 60, 80];
+
+        let v = velocities[Math.floor(Math.random() * velocities.length)];
+        let fs = frequencies[Math.floor(Math.random() * frequencies.length)];
+        let vs = sourceVels[Math.floor(Math.random() * sourceVels.length)];
+
+        // حسابات حقيقية وصحيحة علمياً
+        let fApp = fs * (v / (v - vs));
+        let lApp = (v - vs) / fs;
+        let fRec = fs * (v / (v + vs));
+        let lRec = (v + vs) / fs;
+
+        const qTypes = ["f_approach", "l_approach", "f_recede", "l_recede"];
+        let qType = qTypes[Math.floor(Math.random() * qTypes.length)];
+
+        let questionText = "";
+        let correctValue = 0;
+        let unitStr = "";
+        let rawOptions = [];
+
+        if (qType === "f_approach") {
+            questionText = "سؤال امتحان رسمي: تتحرك مركبة تصدر صوتاً تردده <span dir='ltr'> " + fs + " Hz</span> متجهة مباشرة نحو مراقب ثابت. إذا كانت سرعة الصوت في الهواء تساوي <span dir='ltr'> " + v + " m/s</span> وسرعة المركبة تساوي <span dir='ltr'> " + vs + " m/s</span>، احسب مقدار <b>التردد المسموع (الاقتراب)</b> بوحدة الهرتز؟";
+            correctValue = fApp.toFixed(1);
+            unitStr = " Hz";
+            rawOptions = [correctValue, fRec.toFixed(1), fs.toFixed(1), (fs * 1.5).toFixed(1)];
+        } 
+        else if (qType === "l_approach") {
+            questionText = "سؤال امتحان رسمي: يتقرب مصدر موجي يصدر موجات بتردد <span dir='ltr'> " + fs + " Hz</span> نحو قاعة رصد. إذا علمت أن سرعة الموجات في الوسط تساوي <span dir='ltr'> " + v + " m/s</span> وسرعة المصدر تساوي <span dir='ltr'> " + vs + " m/s</span>، احسب <b>الطول الموجي الظاهري أمام المصدر (الاقتراب)</b> بوحدة المتر؟";
+            correctValue = lApp.toFixed(2);
+            unitStr = " m";
+            rawOptions = [correctValue, lRec.toFixed(2), (v/fs).toFixed(2), (lApp * 2).toFixed(2)];
+        } 
+        else if (qType === "f_recede") {
+            questionText = "سؤال امتحان رسمي: قطار يبتعد مسرعاً عن محطة الرصد بسرعة منتظمة قدرها <span dir='ltr'> " + vs + " m/s</span> وهو يطلق صفيراً بتردد <span dir='ltr'> " + fs + " Hz</span>. إذا كانت سرعة الصوت في الهواء تساوي <span dir='ltr'> " + v + " m/s</span>، احسب <b>التردد الذي يستقبله مراقب ثابت في المحطة (الابتعاد)</b>؟";
+            correctValue = fRec.toFixed(1);
+            unitStr = " Hz";
+            rawOptions = [correctValue, fApp.toFixed(1), fs.toFixed(1), (fRec * 0.8).toFixed(1)];
+        } 
+        else if (qType === "l_recede") {
+            questionText = "سؤال امتحان رسمي: ما هو <b>الطول الموجي الظاهري للموجات خلف المصدر (الابتعاد)</b> بوحدة المتر، إذا كان المصدر يتحرك مبتعداً بسرعة <span dir='ltr'> " + vs + " m/s</span> ويصدر تردداً مقداره <span dir='ltr'> " + fs + " Hz</span> وسرعة الموجة في الوسط هي <span dir='ltr'> " + v + " m/s</span>؟";
+            correctValue = lRec.toFixed(2);
+            unitStr = " m";
+            rawOptions = [correctValue, lApp.toFixed(2), (v/fs).toFixed(2), (lRec * 0.5).toFixed(2)];
+        }
+
+        let uniqueOpts = [...new Set(rawOptions)];
+        while (uniqueOpts.length < 4) {
+            uniqueOpts.push((parseFloat(correctValue) + (uniqueOpts.length * 2.5)).toFixed(2));
+        }
+        uniqueOpts.sort(() => Math.random() - 0.5);
+
+        return {
+            text: questionText,
+            correct: correctValue,
+            unit: unitStr,
+            options: uniqueOpts,
+            meta: { v: v, fs: fs, vs: vs, fApp: fApp, lApp: lApp, fRec: fRec, lRec: lRec, type: qType }
+        };
+    }
+
+    let currentCorrectAnswer = 0;
+    let currentQuizData = {};
+
+    function generateNewQuestion() {
+        document.getElementById('solutionBox').style.display = "none";
+        let q = generateSingleDopplerQuestion();
+        currentQuizData = q;
+        currentCorrectAnswer = q.correct;
+
+        document.getElementById('questionContainer').innerHTML = q.text + "<br><small style='color:#555;'>[علماً بأن جميع الحسابات تخضع مباشرة لعلاقة تأثير دوبلر للسرعات النسبية المنتظمة]</small>";
+
+        const optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.innerHTML = "";
+        
+        q.options.forEach(opt => {
+            let btn = document.createElement('button');
+            btn.className = "option-btn";
+            btn.innerHTML = opt + q.unit;
+            btn.onclick = function() { checkStudentAnswer(opt, btn); };
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkStudentAnswer(selectedOpt, selectedButton) {
+        const allButtons = document.getElementsByClassName('option-btn');
+        for (let i = 0; i < allButtons.length; i++) {
+            allButtons[i].disabled = true;
+            if (allButtons[i].innerText.includes(currentCorrectAnswer.toString())) {
+                allButtons[i].classList.add('correct-choice');
+            }
+        }
+
+        if (selectedOpt == currentCorrectAnswer) {
+            selectedButton.classList.add('correct-choice');
+            speakFeedback("برافو إجابة صحيحة");
+        } else {
+            selectedButton.classList.add('wrong-choice');
+            speakFeedback("حاول من جديد يا بني");
+            showStepByStepSolution(); 
+        }
+    }
+
+    function speakFeedback(phrase) {
+        window.speechSynthesis.cancel();
+        let feedbackUtterance = new SpeechSynthesisUtterance(phrase);
+        feedbackUtterance.lang = 'ar-SA';
+        feedbackUtterance.rate = 0.95;
+        window.speechSynthesis.speak(feedbackUtterance);
+    }
+
+    function showStepByStepSolution() {
+        const solBox = document.getElementById('solutionBox');
+        const solContent = document.getElementById('solutionContent');
+        solBox.style.display = "block";
+
+        let textHTML = "";
+        let d = currentQuizData.meta;
+        let t = currentQuizData.meta.type;
+
+        textHTML += "<b>الخطوة 1:</b> استخراج المعطيات الأساسية من نص مسألة دوبلر:<br>";
+        textHTML += "<div class='math-step-block'>";
+        textHTML += "v = " + d.v + " m/s (سرعة الموجة)<br>";
+        textHTML += "fs = " + d.fs + " Hz (تردد المصدر الأصلي)<br>";
+        textHTML += "vs = " + d.vs + " m/s (سرعة حركة المصدر)";
+        textHTML += "</div>";
+
+        textHTML += "<b>الخطوة 2:</b> التعويض الرياضي المباشر بالقانون بطراز الوورد:<br>";
+        textHTML += "<div class='math-step-block'>";
+        
+        if (t === "f_approach") {
+            textHTML += "fo = fs × [v / (v - vs)]<br>";
+            textHTML += "fo = " + d.fs + " × [" + d.v + " / (" + d.v + " - " + d.vs + ")]<br>";
+            textHTML += "fo = " + d.fs + " × [" + d.v + " / " + (d.v - d.vs) + "] = <b>" + d.fApp.toFixed(1) + " Hz</b>";
+        } 
+        else if (t === "l_approach") {
+            textHTML += "λ' = (v - vs) / fs<br>";
+            textHTML += "λ' = (" + d.v + " - " + d.vs + ") / " + d.fs + "<br>";
+            textHTML += "λ' = " + (d.v - d.vs) + " / " + d.fs + " = <b>" + d.lApp.toFixed(2) + " m</b>";
+        } 
+        else if (t === "f_recede") {
+            textHTML += "fo = fs × [v / (v + vs)]<br>";
+            textHTML += "fo = " + d.fs + " × [" + d.v + " / (" + d.v + " + " + d.vs + ")]<br>";
+            textHTML += "fo = " + d.fs + " × [" + d.v + " / " + (d.v + d.vs) + "] = <b>" + d.fRec.toFixed(1) + " Hz</b>";
+        } 
+        else if (t === "l_recede") {
+            textHTML += "λ' = (v + vs) / fs<br>";
+            textHTML += "λ' = (" + d.v + " + " + d.vs + ") / " + d.fs + "<br>";
+            textHTML += "λ' = " + (d.v + d.vs) + " / " + d.fs + " = <b>" + d.lRec.toFixed(2) + " m</b>";
+        }
+        
+        textHTML += "</div>";
+        solContent.innerHTML = textHTML;
+    }
+
+    // محرك الـ PDF المتطور لإصدار 10 أسئلة حقيقية متكاملة للامتحانات النهائية
+    function printDopplerExamPaperPDF() {
+        let examQuestions = [];
+        for (let i = 0; i < 10; i++) {
+            examQuestions.push(generateSingleDopplerQuestion());
+        }
+
+        let pWin = window.open('', '_blank');
+        let htmlStr = `
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>ورقة عمل امتحانية - تأثير دوبلر</title>
+            <style>
+                body { font-family: 'Arial', sans-serif; padding: 30px; background: #fff; color: #000; }
+                .header { text-align: center; border: 3px solid #000; padding: 15px; margin-bottom: 30px; }
+                .header h2 { margin: 0 0 10px 0; font-size: 20px; font-weight: 900; }
+                .q-block { margin-bottom: 25px; page-break-inside: avoid; line-height: 1.6; font-size: 14px; font-weight: 900; }
+                .q-title { margin-bottom: 10px; }
+                .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-right: 20px; margin-top: 5px; }
+                .opt-item { direction: ltr; text-align: right; }
+                .answer-key-box { margin-top: 50px; border: 3px solid #000; padding: 15px; page-break-inside: avoid; }
+                .answer-key-box h3 { margin: 0 0 15px 0; text-align: center; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 5px; }
+                .key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; text-align: center; font-size: 14px; }
+                .key-item { border: 1px solid #000; padding: 8px; background: #f9f9f9; direction: ltr; font-weight: 900; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>وزارة التربية والتعليم - سلطنة عمان</h2>
+                <h2>ورقة عمل امتحانية رسمية: ظاهرة تأثير دوبلر للموجات</h2>
+                <h3 style="margin:5px 0 0 0;">إعداد الأستاذ: أنور البلوشي (92818606)</h3>
+            </div>
+        `;
+
+        examQuestions.forEach((q, idx) => {
+            let labels = ["A", "B", "C", "D"];
+            htmlStr += `
+            <div class="q-block">
+                <div class="q-title">السؤال (${idx + 1}): ${q.text}</div>
+                <div class="opt-grid">
+            `;
+            q.options.forEach((opt, oIdx) => {
+                htmlStr += `<div class="opt-item"><b>${labels[oIdx]})</b> ${opt} ${q.unit}</div>`;
+            });
+            htmlStr += `
+                </div>
+            </div>
+            `;
+        });
+
+        htmlStr += `
+            <div class="answer-key-box">
+                <h3>📝 مفتاح الإجابة الرقمي القصير والمختصر للمصحح المعلم</h3>
+                <div class="key-grid">
+        `;
+        examQuestions.forEach((q, idx) => {
+            htmlStr += `<div class="key-item">Q(${idx + 1}): <b>${q.correct} ${q.unit}</b></div>`;
+        });
+        htmlStr += `
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
+        pWin.document.write(htmlStr);
+        pWin.document.close();
+        
+        setTimeout(() => {
+            pWin.print();
+        }, 500);
+    }
+</script>
+
+</body>
+</html>
